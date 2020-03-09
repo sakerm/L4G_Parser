@@ -1,0 +1,249 @@
+#<AdxTL>@(#)2.0.0.0 $Revision$
+Gosub TEST From ACLAVAL
+End
+
+#------------------------------------------------------------#
+Subprog VALID_TECH(REPERT,CODTRT,ISACTX,DOSSIER,VALP,TYPAGE,OK,MES)
+Value    Char     REPERT
+Value    Char     CODTRT
+Value    Integer ISACTX
+Value    Char     DOSSIER
+Value    Integer  VALP
+Variable Integer TYPAGE
+
+Variable Integer OK
+Variable Char     MES
+
+Call VALID_TECH(REPERT,CODTRT,ISACTX,DOSSIER,VALP,TYPAGE,OK,MES) From AVAL_TOOL
+End
+
+#------------------------------------------------------------#
+Subprog VALID(REPERT,CODTRT,ISACTX,DOSSIER,VALP,TYPAGE,OK,AERR)
+Value    Char     REPERT
+Value    Char     CODTRT
+Value    Integer ISACTX
+Value    Char     DOSSIER
+Value    Integer  VALP
+Variable Integer TYPAGE
+Variable Integer  OK
+Variable Instance AERR Using C_AERROR
+
+Call VALID(REPERT,CODTRT,ISACTX,DOSSIER,VALP,TYPAGE,OK,AERR) From AVAL_TOOL
+End
+
+
+
+#-------------------------------------------------------#
+Subprog SAVE_STC(DOSSIER,COD)
+Value Char DOSSIER, COD
+Local Integer STAT , K , OKTRT
+Local Char    FICSAV(GDIMFIC)
+Local Char    FICHIER(GDIMFIC)
+Local Char    PREFIX(30)
+
+Local Char    MACHINE(GDIMFIC), APPLI(GDIMFIC)
+
+Call MACHINE(DOSSIER,MACHINE,APPLI) From ASYRSYS
+
+Local Char PREFOLD(6) : PREFOLD = "_old"
+
+FICSAV  = filpath("STC",func SUBACLA.PREFIX_CLA+COD+PREFOLD,"stc",APPLI,"",MACHINE)
+FICHIER = filpath("STC",func SUBACLA.PREFIX_CLA+COD,"stc",APPLI,"",MACHINE)
+If filinfo(FICHIER,0)>=0
+ Call _COPIE(FICHIER,FICSAV,STAT) From ASYRSYS
+Endif
+
+For K=0 To 20
+ FICHIER = filpath("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD,"src",APPLI,"",MACHINE)
+ FICSAV  = filpath("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD+PREFOLD,"src",APPLI,"",MACHINE)
+ If filinfo(FICHIER,0)>=0
+  Call _COPIE(FICHIER,FICSAV,STAT) From ASYRSYS
+ Endif
+Next K
+
+For PREFIX=func APREFIXTRT.GET_PREFIX_CLA_CRUD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_READ,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_UPD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_DEL,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_CRE,
+&             func APREFIXTRT.GET_PREFIX_CLA+"I",
+&             func APREFIXTRT.GET_PREFIX_CLA+"O",
+&             func APREFIXTRT.GET_PREFIX_CLA+"N",
+&             func APREFIXTRT.GET_PREFIX_CLA+"C",
+&             func APREFIXTRT.GET_PREFIX_CLA+"M_",
+&             func APREFIXTRT.GET_PREFIX_SEARCH
+ FICHIER = filpath("TRT",PREFIX+COD,"src",APPLI,"",MACHINE)
+ FICSAV  = filpath("TRT",PREFIX+COD+PREFOLD,"src",APPLI,"",MACHINE)
+ If filinfo(FICHIER,0)>=0
+  Call _COPIE(FICHIER,FICSAV,STAT) From ASYRSYS
+ Endif
+Next
+End
+
+#-------------------------------------------------------#
+Subprog RESTORE_STC(DOSSIER,COD)
+Value Char DOSSIER, COD
+Local Integer STAT , K , OKTRT,TYPAGE
+Local Char    FICSAV(GDIMFIC)
+Local Char    FICHIER(GDIMFIC)
+Local Char    PREFIX(30)
+
+Local Char    MACHINE(GDIMFIC), APPLI(GDIMFIC),MES(250)
+
+Call MACHINE(DOSSIER,MACHINE,APPLI) From ASYRSYS
+
+Local Char PREFOLD(6) : PREFOLD = "_old"
+
+FICSAV  = filpath("STC",func SUBACLA.PREFIX_CLA+COD+PREFOLD,"stc",APPLI,"",MACHINE)
+FICHIER = filpath("STC",func SUBACLA.PREFIX_CLA+COD,"stc",APPLI,"",MACHINE)
+If filinfo(FICSAV,0)>=0
+ Call _COPIE(FICSAV,FICHIER,STAT) From ASYRSYS
+ Call _EFFACE(FICSAV,STAT) From ASYRSYS
+ #Call VALID_TECH("STC",COD,0,DOSSIER,0,TYPAGE,STAT,MES) From ACLAVALSUB
+ Call VALID_TECH("STC",func SUBACLA.PREFIX_CLA+COD,0,DOSSIER,0,TYPAGE,STAT,MES) From ACLAVALSUB
+Endif
+
+For K=0 To 20
+ FICHIER = filpath("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD,"src",APPLI,"",MACHINE)
+ FICSAV  = filpath("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD+PREFOLD,"src",APPLI,"",MACHINE)
+ If filinfo(FICSAV,0)>=0
+  Call _COPIE(FICSAV,FICHIER,STAT) From ASYRSYS
+  Call _EFFACE(FICSAV,STAT) From ASYRSYS
+  Call VALID_TECH("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD,0,DOSSIER,0,TYPAGE,STAT,MES) From ACLAVALSUB
+ Endif
+Next K
+
+For PREFIX=func APREFIXTRT.GET_PREFIX_CLA_CRUD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_READ,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_UPD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_DEL,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_CRE,
+&             func APREFIXTRT.GET_PREFIX_CLA+"I",
+&             func APREFIXTRT.GET_PREFIX_CLA+"O",
+&             func APREFIXTRT.GET_PREFIX_CLA+"N",
+&             func APREFIXTRT.GET_PREFIX_CLA+"C",
+&             func APREFIXTRT.GET_PREFIX_CLA+"M_",
+&             func APREFIXTRT.GET_PREFIX_SEARCH
+ FICHIER = filpath("TRT",PREFIX+COD,"src",APPLI,"",MACHINE)
+ FICSAV  = filpath("TRT",PREFIX+COD+PREFOLD,"src",APPLI,"",MACHINE)
+ If filinfo(FICSAV,0)>=0
+  Call _COPIE(FICSAV,FICHIER,STAT) From ASYRSYS
+  Call _EFFACE(FICSAV,STAT) From ASYRSYS
+  Call VALID_TECH("TRT",PREFIX+COD,0,DOSSIER,0,TYPAGE,STAT,MES) From ACLAVALSUB
+ Endif
+Next
+End
+
+
+#----------------------------------------------#
+#----------------------------------------------#
+
+Subprog DELETE_STCOLD(DOSSIER,COD)
+Value Char DOSSIER, COD
+Local Integer STAT , K , OKTRT
+Local Char    FICANU(GDIMFIC)
+Local Char    FICHIER(GDIMFIC)
+Local Char    PREFIX(30)
+
+Local Char    MACHINE(GDIMFIC), APPLI(GDIMFIC),EXTSTC(6),EXTTRT(6)
+
+Call MACHINE(DOSSIER,MACHINE,APPLI) From ASYRSYS
+
+[L]EXTSTC = "_old"
+[L]EXTTRT = "_old"
+
+Gosub DELETESTC
+End
+
+#----------------------------------------------#
+#----------------------------------------------#
+
+Subprog DELETE_ALLSTC(DOSSIER,COD)
+Value Char DOSSIER, COD
+Local Integer STAT , K , OKTRT
+Local Char    FICANU(GDIMFIC)
+Local Char    FICHIER(GDIMFIC)
+Local Char    PREFIX(30)
+
+Local Char    MACHINE(GDIMFIC), APPLI(GDIMFIC),EXTSTC(6),EXTTRT(6)
+
+Call MACHINE(DOSSIER,MACHINE,APPLI) From ASYRSYS
+
+[L]EXTSTC = ""
+[L]EXTTRT = ""
+
+Gosub DELETESTC
+End
+
+Subprog DELETE_STC(DOSSIER,COD)
+Value Char DOSSIER, COD
+Local Integer STAT , K , OKTRT
+Local Char    FICANU(GDIMFIC)
+Local Char    FICHIER(GDIMFIC)
+Local Char    PREFIX(30)
+
+Local Char    MACHINE(GDIMFIC), APPLI(GDIMFIC),EXTSTC(6),EXTTRT(6)
+
+Call MACHINE(DOSSIER,MACHINE,APPLI) From ASYRSYS
+
+[L]EXTSTC = ""
+[L]EXTTRT = ""
+Gosub DELSTC
+
+End
+
+$DELETESTC
+Local Char WCMDE(250)
+WCMDE = adxmac(0)+'@lsadx -a '+nomap-' STC adx'
+Local File (STC(30)) From System WCMDE As [STC_]
+For [STC_] Where (STC="C_"+COD or (len(STC)>len("C_"+COD) & left$(STC,len("C_"+COD+"_"))="C_"+COD+"_")       )
+ [L]COD =  right$([STC_]STC,3)
+ Gosub DELSTC
+Next TRT_
+Close Local File [STC_]
+Return
+
+#----------------------------------------------#
+
+$DELSTC
+FICANU = filpath("STC",func SUBACLA.PREFIX_CLA+COD+[L]EXTSTC,"stc",APPLI,"",MACHINE)
+If filinfo(FICANU,0)>=0
+ Call _EFFACE(FICANU,STAT) From ASYRSYS
+Endif
+#Call _EFFACE_STC(MACHINE,APPLI,func SUBACLA.PREFIX_CLA+COD+[L]EXTSTC,STAT) From ASYRSYS
+Call _INVALID_STC(MACHINE,APPLI,func SUBACLA.PREFIX_CLA+COD+[L]EXTSTC,STAT) From ASYRSYS
+
+For K=0 To 20
+ FICHIER = filpath("TRT",func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD+[L]EXTTRT,"src",APPLI,"",MACHINE)
+ If filinfo(FICHIER,0)>=0
+  Call _EFFACE(FICHIER,STAT) From ASYRSYS
+ Endif
+ Call EXISTE_ADX(MACHINE,APPLI,func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD+[L]EXTTRT,OKTRT) From ASYRSYS
+ If OKTRT>0
+  Call _EFFACE_ADX(MACHINE,APPLI,func APREFIXTRT.GET_PREFIX_CLA+num$(K)+[L]COD+[L]EXTTRT,STAT) From ASYRSYS
+ Endif
+Next K
+
+For PREFIX=func APREFIXTRT.GET_PREFIX_CLA_CRUD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_READ,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_UPD,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_DEL,
+&             func ACLAVALCRUD.GET_PREFIX_CLA_CRE,
+&             func APREFIXTRT.GET_PREFIX_CLA+"I",
+&             func APREFIXTRT.GET_PREFIX_CLA+"O",
+&             func APREFIXTRT.GET_PREFIX_CLA+"N",
+&             func APREFIXTRT.GET_PREFIX_CLA+"C",
+&             func APREFIXTRT.GET_PREFIX_CLA+"M_",
+&             func APREFIXTRT.GET_PREFIX_SEARCH
+ FICHIER = filpath("TRT",PREFIX+COD+[L]EXTTRT,"src",APPLI,"",MACHINE)
+ If filinfo(FICHIER,0)>=0
+  Call _EFFACE(FICHIER,STAT) From ASYRSYS
+ Endif
+ Call EXISTE_ADX(MACHINE,APPLI,PREFIX+COD+[L]EXTTRT,OKTRT) From ASYRSYS
+ If OKTRT>0
+  Call _EFFACE_ADX(MACHINE,APPLI,PREFIX+COD+[L]EXTTRT,STAT) From ASYRSYS
+ Endif
+Next
+Return
+
+End
