@@ -1267,6 +1267,7 @@ var Parser = /** @class */ (function () {
                 }
                 parseStatementSep();
             }
+            // console.log("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks.length + "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks);
             if (blocks.length > 0)
                 throw error('unterminated block: ' + blocks[blocks.length - 1].tag);
         }

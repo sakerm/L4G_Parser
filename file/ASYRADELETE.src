@@ -1,33 +1,4 @@
-#<AdxTL>@(#)0.0.0.0 $Revision$
-#TODO: Code d'activité ?
-#TODO: liens de type 3 ?
-#TODO: Gosub ACTION AV_VERF_ANU   From =ATRTACT (VERIFY)
-#TODO: Gosub ACTION AP_VERF_ANU   From =ATRTACT (VERIFY)
-#TODO: Gosub ACTION VERF_ANU      From =ATRTACT (VERIFY)
-#TODO: Gosub ACTION ANNULE        From =ATRTACT
-#TODO: Gosub ACTION AV_ANNULE     From =ATRTACT
-#TODO: Gosub ACTION APRES_ANNULE  From =ATRTACT
-#TODO: Gosub ACTION AP_ANNULE     From =ATRTACT
 
-#TODO: Gosub ACTION from ANUCODB:
-#$ACTION
-#Case ACTION
-# When "ANUDEB" : Gosub ANUDEB
-# When "ANULNK" : Gosub ANULNK
-# When "ANUEND" : Gosub ANUEND
-# When "ANUCTL" : Gosub ANUCTL
-# When "ANUEXE" : Gosub ANUEXE
-#Endcase
-#Return
-
-
-#**
-#* VERIFY
-#* Checks that the object 'WCLA' can be deleted
-#*
-#* @param ACLASSE
-#* @param AINSTANCE
-#*!
 Funprog VERIFY(WCLA,MAXLINKS)
 Variable Instance  WCLA Using OBJECT
 Value Integer      MAXLINKS
