@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var ParseError = /** @class */ (function (_super) {
     __extends(ParseError, _super);
     function ParseError(message) {
@@ -82,7 +82,7 @@ function createOp(text, code, precedence, isPrefix, isInfix, isAssociative, isAs
         isPrefix: isPrefix,
         isInfix: isInfix,
         isAssociative: isAssociative,
-        isAssign: isAssign
+        isAssign: isAssign,
     };
 }
 createOp('.', 'DOT', 1, false, true, true, false);
@@ -504,7 +504,7 @@ var Parser = /** @class */ (function () {
                 else {
                     throw error('invalid arg count for type function');
                 }
-            }
+            },
         };
         function _sigma(n) {
             if (!n.args || n.args.length !== 3)
@@ -905,10 +905,10 @@ var Parser = /** @class */ (function () {
             MESBOX: parseDlgBox,
             DLGBOX: parseDlgBox,
             ONKEY: parseOn,
-            ONEVENT: parseOn
+            ONEVENT: parseOn,
         };
         var contextualDeclKeywords = {
-            ANY: parseVarDecl
+            ANY: parseVarDecl,
         };
         function parseScope(node) {
             node.mode = node.tag;
@@ -1247,10 +1247,10 @@ var Parser = /** @class */ (function () {
             STRICT: function (node) {
                 var n = new Node('PRAGMA');
                 n.data = {
-                    strict: true
+                    strict: true,
                 };
                 node.statements.push(n);
-            }
+            },
         };
         function parseScript(node) {
             while (pos < source.length && parseChar(AT)) {
@@ -1655,7 +1655,7 @@ var Parser = /** @class */ (function () {
             LISTBOX: parseListbox,
             TREEBOX: parseListbox,
             PICKBOX: parseListbox,
-            LEFTBOX: parseListbox
+            LEFTBOX: parseListbox,
         };
         function parseInpBox(node) {
             if (!peekKeyword('MASK'))
@@ -2330,7 +2330,7 @@ var Parser = /** @class */ (function () {
             LISTBOX: null,
             TREEBOX: null,
             PICKBOX: parsePartBox,
-            SYRSEND: parseSyrSend
+            SYRSEND: parseSyrSend,
         };
         var optKeywords = {
             FROM: true,
@@ -2360,7 +2360,7 @@ var Parser = /** @class */ (function () {
             CODED: true,
             EXTENDED: true,
             FIRST: true,
-            LAST: true
+            LAST: true,
         };
         this.parse = function parse() {
             var t0 = Date.now();
@@ -2373,7 +2373,7 @@ var Parser = /** @class */ (function () {
             return {
                 node: node,
                 lines: line,
-                millis: Date.now() - t0
+                millis: Date.now() - t0,
             };
         };
         this.parseExp = parseExp;
@@ -2381,5 +2381,3 @@ var Parser = /** @class */ (function () {
     return Parser;
 }());
 exports.Parser = Parser;
-var parsed = new Parser('CONDITION=(1=1)').parse();
-console.log(JSON.stringify(parsed));

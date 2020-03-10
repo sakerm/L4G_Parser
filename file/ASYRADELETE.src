@@ -1,0 +1,570 @@
+#<AdxTL>@(#)0.0.0.0 $Revision$
+#TODO: Code d'activité ?
+#TODO: liens de type 3 ?
+#TODO: Gosub ACTION AV_VERF_ANU   From =ATRTACT (VERIFY)
+#TODO: Gosub ACTION AP_VERF_ANU   From =ATRTACT (VERIFY)
+#TODO: Gosub ACTION VERF_ANU      From =ATRTACT (VERIFY)
+#TODO: Gosub ACTION ANNULE        From =ATRTACT
+#TODO: Gosub ACTION AV_ANNULE     From =ATRTACT
+#TODO: Gosub ACTION APRES_ANNULE  From =ATRTACT
+#TODO: Gosub ACTION AP_ANNULE     From =ATRTACT
+
+#TODO: Gosub ACTION from ANUCODB:
+#$ACTION
+#Case ACTION
+# When "ANUDEB" : Gosub ANUDEB
+# When "ANULNK" : Gosub ANULNK
+# When "ANUEND" : Gosub ANUEND
+# When "ANUCTL" : Gosub ANUCTL
+# When "ANUEXE" : Gosub ANUEXE
+#Endcase
+#Return
+
+
+#**
+#* VERIFY
+#* Checks that the object 'WCLA' can be deleted
+#*
+#* @param ACLASSE
+#* @param AINSTANCE
+#*!
+Funprog VERIFY(WCLA,MAXLINKS)
+Variable Instance  WCLA Using OBJECT
+Value Integer      MAXLINKS
+
+Local Integer ASTATUS:ASTATUS=0
+Local Integer CHECK:CHECK=0
+
+Local Char    ACLASSE(25)
+Local Char    KEYS(250)
+Local Char    KEYVAL(250)(1..)
+Local Char    LINKS(250)(1..)
+Local Integer NBLINKS: NBLINKS=0
+Local Integer I,J,K
+Local Char    REFERR(250)
+Local Char    STRING(250)
+Local Char    RECORDDESC_P(250)(1..3)
+Local Char    RECORDDESC(250)(1..2)
+Local Integer COUNT
+
+If nomap=WCLA.ACTX.AFOLDER or filinfo(filpath("FIL","ACLASSE","fde",WCLA.ACTX.AFOLDER),0)<0
+ Local File ACLASSE    [ACLA]
+ Local File ATABLE     [ATB_]
+ Local File ATABZON    [ATZ_]
+ Local File ATEXTRA    [AXX_]
+Else
+ Local File =WCLA.ACTX.AFOLDER+".ACLASSE"    [ACLA]
+ Local File =WCLA.ACTX.AFOLDER+".ATABLE"     [ATB_]
+ Local File =WCLA.ACTX.AFOLDER+".ATABZON"    [ATZ_]
+ Local File =WCLA.ACTX.AFOLDER+".ATEXTRA"    [AXX_]
+Endif
+
+ACLASSE = right$(WCLA.ObjectType(),3)
+
+#Check that the class exists:
+Read [ACLA]ACLA0 = [L]ACLASSE
+If fstat > 0
+ [L]ASTATUS = fmet WCLA.ACTX.ASETERROR("VERIFY",[L]ACLASSE-":"-mess(4,140,1),[V]CST_AERROR): Goto VERIFY_END
+Endif
+
+#compute the database keys:
+If dim(WCLA.AKEYFLD)>0 & dim(WCLA.AKEYTYPE)>0
+ For I=1 To maxtab(WCLA.AKEYFLD)
+  If len(KEYS)>0:KEYS+="~":Endif
+  KEYS += WCLA.AKEYFLD(I)
+  Case WCLA.AKEYTYPE(I)
+   When 7,23
+    KEYVAL(I)= '"'+WCLA.AKEYFLD(I)+'"'
+   When 5
+    KEYVAL(I)= '@'+WCLA.AKEYFLD(I)+'@'
+   When Default
+    KEYVAL(I)=  WCLA.AKEYFLD(I)
+  Endcase
+ Next I
+Endif
+
+#check the current folder:
+ASTATUS = func ASYRADELETE.VERIFY_LINKS(WCLA,WCLA.ACTX.AFOLDER,[F:ACLA]TABREF,KEYVAL,LINKS,NBLINKS,MAXLINKS)
+
+If ASTATUS>CST_AWARNING
+ #set the current operation:
+ #annulation on $KEYS
+
+ Local File =[F:ACLA]TABREF [TBR_]
+
+ #Set the main error's title
+ RECORDDESC_P(1) = [F:ACLA]TABREF
+ RECORDDESC_P(2) = WCLA.AKEYFLD(1)
+ RECORDDESC_P(3) = WCLA.AKEYFLD(2)
+ Gosub GETRECORDDESC
+
+ # Description of the table linked to the classe from which one instance is being deleted
+ REFERR  = mess(46,150,1) - KEYS           - RECORDDESC(2)
+ REFERR -= mess(198,133,1)- [F:ACLA]TABREF - RECORDDESC(1)
+
+ For I=1 To NBLINKS
+  ASTATUS = fmet WCLA.ACTX.ASETERROR(REFERR,LINKS(I)+chr$(10)+chr$(13)+mess(176,115,1),[V]CST_AERROR)
+ Next I
+Endif
+
+Close Local File [ACLA]
+Close Local File [ATB_]
+Close Local File [ATZ_]
+Close Local File [AXX_]
+
+$VERIFY_END
+End ASTATUS
+
+#**
+#* GETRECORDDESC
+#*
+#*!
+$GETRECORDDESC
+
+ Raz RECORDDESC
+ Read [ATB_]CODFIC =  RECORDDESC_P(1)
+ RECORDDESC(1)  = func ASYRFNC.TEXTE([F:ATB_]INTITFIC)
+
+ If !fstat
+  Read [ATZ_]CODZONE = [ATB_]CODFIC;[F:ATB_]INTIT
+  If !fstat
+   Case [ATZ_]CODTYP
+    When "AXX","AX1","AX2","AX3"
+     Read [AXX_]AXX0  = RECORDDESC_P(1);[F:ATB_]INTIT;WCLA.ACTX.LAN;RECORDDESC_P(2);RECORDDESC_P(3)
+     If !fstat : RECORDDESC(2) = [F:AXX_]TEXTE : Endif
+    When "ATX"
+     RECORDDESC(2) = func ASYRFNC.TEXTE(evalue("[F:LNK_]"+[F:ATB_]INTIT))
+    When Default
+     RECORDDESC(2) = num$(evalue("[F:LNK_]"+[F:ATB_]INTIT))
+   Endcase
+  Endif
+ Endif
+ If vireblc(RECORDDESC(1),4)<>"" : RECORDDESC(1) = "("+RECORDDESC(1)+")" : Endif
+ If vireblc(RECORDDESC(2),4)<>"" : RECORDDESC(2) = "("+RECORDDESC(2)+")" : Endif
+ Raz RECORDDESC_P
+Return
+
+#**
+#* VERIFY_LINKS
+#*
+#* @param WCLA
+#* @param APPLI
+#* @param TABREF
+#* @param KEYREF
+#* @param LINKS
+#* @param NBLINKS
+#* @param MAXLINKS
+#*!
+Funprog VERIFY_LINKS(WCLA,APPLI,TABREF,KEYREF,LINKS,NBLINKS,MAXLINKS)
+Variable Instance  WCLA Using OBJECT
+Value Char         APPLI
+Value Char         TABREF
+Variable Char      KEYREF()(1..)
+Variable Char      LINKS()(1..)
+Variable Integer   NBLINKS
+Value Integer      MAXLINKS
+Local Integer      TYPELINKS(0..3)
+
+Local Char         OPERATION(20): OPERATION="VERIFY"
+
+TYPELINKS(0)=1
+
+Local Integer  ASTATUS
+ASTATUS = func ASYRADELETE.CHECK_LINKS(WCLA,APPLI,TABREF,KEYREF,OPERATION,TYPELINKS,LINKS,NBLINKS,MAXLINKS)
+End ASTATUS
+
+#**
+#* DELETE_LINKS
+#*
+#* @param WCLA
+#* @param APPLI
+#* @param TABREF
+#* @param KEYREF
+#* @param LINKS
+#* @param NBLINKS
+#* @param MAXLINKS
+#*!
+Funprog DELETE_LINKS(WCLA,APPLI,TABREF,KEYREF,LINKS,NBLINKS,MAXLINKS)
+Variable Instance  WCLA Using OBJECT
+Value Char         APPLI
+Value Char         TABREF
+Variable Char      KEYREF()(1..)
+Variable Char      LINKS()(1..)
+Variable Integer   NBLINKS
+Value Integer      MAXLINKS
+Local Integer      TYPELINKS(0..3)
+
+Local Char         OPERATION(20): OPERATION="DELETE"
+
+TYPELINKS(0)=1 : #Forbidden!
+TYPELINKS(1)=2 : #Delete the entity
+TYPELINKS(2)=3 : #Remove the link
+TYPELINKS(3)=4 : #Controled by the object
+
+Local Integer  ASTATUS
+ASTATUS = func ASYRADELETE.CHECK_LINKS(WCLA,APPLI,TABREF,KEYREF,OPERATION,TYPELINKS,LINKS,NBLINKS,MAXLINKS)
+End ASTATUS
+
+#**
+#* CHECK_LINKS
+#*
+#* @param WCLA
+#* @param APPLI
+#* @param TABREF
+#* @param KEYREF
+#* @param LINKS
+#* @param NBLINKS
+#* @param MAXLINKS
+#*!
+Funprog CHECK_LINKS(WCLA,APPLI,TABREF,KEYREF,OPERATION,TYPELINKS,LINKS,NBLINKS,MAXLINKS)
+Variable Instance  WCLA Using OBJECT
+Value Char         APPLI
+Value Char         TABREF
+Variable Char      KEYREF()(1..)
+Variable Integer   TYPELINKS()
+Variable Char      OPERATION
+Variable Char      LINKS()(1..)
+Variable Integer   NBLINKS
+Value Integer      MAXLINKS
+
+Local Char    TREATMENT(30)
+Local Integer ASTATUS:ASTATUS=0 # status returned by VERIFY_LINKS
+Local Char    ZONE(GLONAVA)(1..)
+Local Integer I,J,K,I1,I2,P
+Local Clbfile CRITERIA1(3)(1..4),CRITERIA2,CRITERIA3SQL,CRITERIA3LOG,CRITERIA(3),SUBCRITERIA(3)
+Local Char    CRITERIA4(250)
+Local Integer CRITERIA3LOGVAL
+Local Char    EXPLIEN(250),EXPTOKEN(250),EXPTOKENL(250),EXPTOKENR(250)
+Local Integer INDVAL,INDMAX,COUNT,ISSQL,FINDICE,OPENLNK
+Local Char    CODZONE(50)
+Local Char    REFERR(250)(1..3)
+Local Char    IDXDESC(250)
+Local Char    FLD(250)
+Local Char    IDXKEYS(250)(1..), RECORDKEY(250),RECORDKEYS(250)(1..)
+Local Char    RECORDDESC_P(250)(1..3)
+Local Char    RECORDDESC(250)(1..2)
+Local Char    TABLE(GLONATB)
+Local Char    ACTION(20)
+Local Char    CUMCRITERIA(4)(1..4)
+Local Integer DELTYPE
+Local Clbfile CODEZONES(3)(1..4)
+Local Char    CODEZONE(250)(0..1)
+Local Integer RESULT
+Local Char    STATEMENT
+Local Integer COUNT
+
+CUMCRITERIA(1)=" or "
+CUMCRITERIA(2)=" or "
+CUMCRITERIA(3)="+"
+CUMCRITERIA(4)=" or "
+
+If nomap=APPLI or filinfo(filpath("FIL","ATABLE","fde",APPLI),0)<0
+ Local File ATABLE     [ATB]
+ Local File ATABLE     [ATB_]
+ Local File ATABZON    [ATZ]
+ Local File ATABZON    [ATZ_]
+ Local File ATABIND    [ATI]
+ Local File ATEXTRA    [AXX_]
+Else
+ Local File =APPLI+".ATABLE"     [ATB]
+ Local File =APPLI+".ATABLE"     [ATB_]
+ Local File =APPLI+".ATABZON"    [ATZ]
+ Local File =APPLI+".ATABZON"    [ATZ_]
+ Local File =APPLI+".ATABIND"    [ATI]
+ Local File =APPLI+".ATEXTRA"    [AXX_]
+Endif
+
+
+
+If nomap=APPLI or filinfo(filpath("FIL",TABREF,"fde",APPLI),0)<0
+ Local File =TABREF [TBR_]
+Else
+ Local File =APPLI+"."+TABREF [TBR_]
+Endif
+
+For [ATZ]LIEN(2) Where LIEN=TABREF & find(ANNUL,TYPELINKS)
+ #For each table linked to TABREF
+ Raz CRITERIA1,CODEZONES,OPENLNK
+ TABLE = [F:ATZ]CODFIC
+ Read [ATB]CODFIC = TABLE
+
+ CHECK = 0
+ If [F:ATB]TYPFIC=3 & nomap=APPLI & filinfo(filpath("FIL",TABLE,"fde"),0)>0 : # Table système
+  CHECK = 1
+ Elsif filinfo(filpath("FIL",TABLE,"fde",APPLI),0)>0
+  CHECK = 1
+ Endif
+ #TODO GDOSH!
+ # If CHECK & APPLI=WCLA.ACTX.AFOLDERH
+ #  Call VUE_OK(FICHIER,APPLI,"FIL",CHECK) From DOSVUE
+ #  CHECK = !CHECK
+ # Endif
+
+ If CHECK
+  #For each table linked to TABREF
+  For [ATZ]LIEN
+   Raz CRITERIA2
+   If len([F:ATZ]EXPLIEN) > 0
+    INDVAL=0
+    INDMAX=1
+    #loop on indice: INDMAX will be computed during the first loop
+    #! works with 'While' but not with 'For'
+    While INDVAL < INDMAX
+     #get the full expression:
+     EXPLIEN = vireblc(format$("KT:80X",[F:ATZ]EXPLIEN),2)
+     #split EXPLIEN
+     I=1
+     Raz CRITERIA3SQL,CRITERIA3LOG,COUNT,FINDICE
+     While EXPLIEN<>"" & KEYREF(I) <>""
+      Raz CRITERIA4
+      ISSQL=0
+
+      J = instr(1,EXPLIEN,";")
+      If J
+       EXPTOKEN = left$(EXPLIEN,J-1)
+       EXPLIEN  = right$(EXPLIEN,J+1)
+       COUNT   += 1
+      Else
+       EXPTOKEN = EXPLIEN
+       EXPLIEN  = ""
+      Endif
+      #does the token contains 'indice'?
+      J = instr(1,EXPTOKEN,"indice")
+      If J
+       #does the token contains '(indice)'?
+       K = instr(1,EXPTOKEN,"(indice)")
+       If K
+        #the token contains (indice):
+        EXPTOKENL = left$(EXPTOKEN,K-1)
+        EXPTOKENR = right$(EXPTOKEN,K+9)
+        #compute INDXMAX
+        Read [ATZ_]CODZONE = TABLE;EXPTOKENL
+        If fstat = 0
+         INDMAX = [ATZ_]DIME
+         #This part of EXPLIEN refers to a TABLE's field:
+         ISSQL = 1
+         If [F:ATZ]ANNUL <> 3 and ((COUNT = 0) or (FINDICE=0 & len(EXPLIEN)=0))
+          #The SQL CRITERIA1 can be optimized:
+          CRITERIA4 = "(find("+KEYREF(I)+","+ EXPTOKENL+"(0.."+num$([ATZ]DIME-1)+"))<>0 )"
+          INDMAX = 1
+         Else
+          CRITERIA4 = EXPTOKENL + '(' + num$(INDVAL) + ')' + EXPTOKENR + '=' + KEYREF(I)
+         Endif
+        Endif
+       Else
+        #the token contains indice:
+        FINDICE=1
+        EXPTOKENL = left$(EXPTOKEN,J-1)
+        EXPTOKENR = right$(EXPTOKEN,J+6)
+        #condition to evaluate:
+        CRITERIA4 = EXPTOKENL + num$(INDVAL) + EXPTOKENR + '=' + KEYREF(I)
+       Endif
+      Else
+       #EXPTOKEN doesn't contains indice
+       #skip part of the link containing [V]GSUPCLE :
+       J = instr(1,EXPTOKEN,"[V]GSUPCLE")
+       If J=0
+        CRITERIA4 = EXPTOKEN + '=' + KEYREF(I)
+        If left$(EXPTOKEN,4)<>"[V]"
+         J = instr(1,EXPTOKEN,"(")
+         If J>0
+          EXPTOKEN = left$(EXPTOKEN,J-1)
+         Endif
+         #is EXPTOKEN a TABLE's field ?
+         Read [ATZ_]CODZONE = TABLE;EXPTOKEN
+         If fstat = 0
+          #This part of EXPLIEN refers to a TABLE's field:
+          ISSQL = 1
+         Endif
+        Endif
+       Endif
+      Endif
+
+      If len(CRITERIA4)>0
+       If ISSQL = 0 # is CRITERIA4 a SQL condition ?
+        If len(CRITERIA3LOG)>0 : Append CRITERIA3LOG," and " : Endif
+        Append CRITERIA3LOG, CRITERIA4
+       Else
+        If len(CRITERIA3SQL)>0 : Append CRITERIA3SQL," and " : Endif
+        Append CRITERIA3SQL, CRITERIA4
+       Endif
+      Endif
+      #Next key's token
+      I += 1
+     Wend
+     If len(CRITERIA3LOG)>0
+      Onerrgo VERIFY_LINKS_ERR_EVALUE
+      CRITERIA3LOGVAL = evalue(CRITERIA3LOG)
+      Onerrgo
+      If CRITERIA3LOGVAL = 0
+       #The logical part of the condition isn't met =>
+       #the SQL condition has not to be controled:
+       Raz CRITERIA3SQL
+      Endif
+     Endif
+     If len(CRITERIA3SQL)>0
+      If instr(1,CRITERIA3SQL," and ")> 0 : CRITERIA3SQL = '('+CRITERIA3SQL+')' :Endif
+      If len(CRITERIA2)>0 : Append CRITERIA2, CUMCRITERIA([F:ATZ]ANNUL) : Endif
+      Append CRITERIA2, CRITERIA3SQL
+
+     Endif
+     #store CODZONE (necessary for DELTYP=3)
+     If len(CODEZONES([F:ATZ]ANNUL) ) > 0 : Append CODEZONES([F:ATZ]ANNUL),"+" : Endif
+     Append CODEZONES([F:ATZ]ANNUL), [F:ATZ]CODZONE + "(" + num$(INDVAL) + ")"
+
+     #Next INDVAL
+     INDVAL +=1
+    Wend
+   Else
+    CRITERIA2 = [F:ATZ]CODZONE + '=' + KEYREF(1)
+
+    #store CODZONE (necessary for DELTYP=3)
+    If len(CODEZONES([F:ATZ]ANNUL) ) > 0 : Append CODEZONES([F:ATZ]ANNUL),"+" : Endif
+    Append CODEZONES([F:ATZ]ANNUL), [F:ATZ]CODZONE
+   Endif
+
+   If len(CRITERIA2)>0
+     #Depending on the kind of "DELETE" the CRITERIA can be appended or not:
+     #CODZON is not used => appended
+     #CODZON is used => not appended
+     If len(CRITERIA1([F:ATZ]ANNUL) ) > 0 : Append CRITERIA1([F:ATZ]ANNUL),CUMCRITERIA([F:ATZ]ANNUL) : Endif
+     Append CRITERIA1([F:ATZ]ANNUL), CRITERIA2
+     OPENLNK=1
+
+   Endif
+  Next
+
+  If OPENLNK > 0
+
+
+   Raz IDXKEYS,RECORDDESC_P
+   RECORDDESC_P(1) =TABLE
+
+   #Gets part of the TABLE's index:
+   P=1
+   Read [ATI]NUMLIG(2) = TABLE;1
+   IDXDESC = [ATI]DESCRIPT
+   While IDXDESC<>""
+    I1 = instr(1,IDXDESC,"+")
+    I2 = instr(1,IDXDESC,"-")
+    If I2
+     If I1 : I1 = min(I1,I2) : Else : I1 = I2 : Endif
+    Endif
+    If I1
+     IDXKEYS(P) = left$(IDXDESC,I1-1)
+     IDXDESC    = right$(IDXDESC,I1+1)
+    Else
+     IDXKEYS(P) = IDXDESC
+     IDXDESC = ""
+    Endif
+    P +=1
+   Wend
+
+   If nomap=APPLI or filinfo(filpath("FIL",TABLE,"fde",APPLI),0)<0
+    Local File =TABLE [LNK_]
+   Else
+    Local File =APPLI+"."+TABLE [LNK_]
+   Endif
+
+   #Loop on criteria :
+   For DELTYPE=1 To 4
+    Raz CRITERIA
+    CRITERIA    = CRITERIA1(DELTYPE)
+    CODEZONE(0) = CODEZONES(DELTYPE)
+    If len(CRITERIA) > 0
+
+     If DELTYPE=2
+      #Delete entities:
+      If !adxlog : Trbegin [LNK_] : Endif
+      Raz COUNT
+      Delete [LNK_] Where evalue(CRITERIA)
+     Else
+      #if DELTYP=3 then CRITERIA has to be splitted
+      #trick for storing several criteria in one single CLOB!
+      While CRITERIA<>""
+       CODEZONE(1) = CODEZONE(0)
+       I = instr(1,CRITERIA,"+")
+       If I
+        SUBCRITERIA = left$(CRITERIA,I-1)
+        CRITERIA    = right$(CRITERIA,I+1)
+        J = instr(1,CODEZONE(0),"+")
+        If J
+         CODEZONE(1) = left$(CODEZONE(0),J-1)
+         CODEZONE(0) =  right$(CODEZONE(0),J+1)
+        Endif
+       Else
+        SUBCRITERIA = CRITERIA
+        CRITERIA    = ""
+        CODEZONE(0) = ""
+       Endif
+       For [LNK_] Where evalue(SUBCRITERIA)
+        Raz RECORDKEYS
+        P = 1
+        While len(IDXKEYS(P)) >0
+         RECORDKEYS(P)  = num$(evalue("[F:LNK_]"+IDXKEYS(P)))
+         P += 1
+        Wend
+        Case (OPERATION + "_" + num$(DELTYPE))
+         When "VERIFY_1","DELETE_1":#The entity has to be deleted first!
+          Raz RECORDKEY
+          P = 1
+          While len(RECORDKEYS(P)) >0
+           If len(RECORDKEY) > 0 : RECORDKEY += "~" : Endif
+           RECORDKEY += RECORDKEYS(P)
+           If P<=2: RECORDDESC_P(P+1)=RECORDKEYS(P) : Endif
+           P += 1
+          Wend
+          #record the reference of the link:
+          Gosub GETRECORDDESC
+          NBLINKS += 1
+          #The record $KEYS ($RECORDDESC(2))
+          LINKS(NBLINKS)  = mess(101,126,1) - RECORDKEY - RECORDDESC(2)
+          #is used in $TABLE ($RECORDDESC(1))
+          LINKS(NBLINKS) -= mess(198,133,1) - TABLE- RECORDDESC(1)
+          ASTATUS=CST_AERROR
+
+          If MAXLINKS & NBLINKS>=MAXLINKS : Break : Endif
+
+         When "DELETE_2":#The entity has to be deleted
+          ASTATUS=ASTATUS
+         When "DELETE_3":#CODZONE has to be resetted:
+          If !adxlog : Trbegin [LNK_] : Endif
+          Case evalue("type([F:LNK_]"+CODEZONE(1)+")")
+           When  1,2,4,5,6,7,8,9
+            Assign "[F:LNK_]" + CODEZONE(1) With 0
+           When  3
+            Assign "[F:LNK_]" + CODEZONE(1) With [0/0/0]
+           When Default
+            Assign "[F:LNK_]" + CODEZONE(1) With ""
+          Endcase
+          Rewrite [LNK_]
+        Endcase
+       Next LNK_
+      Wend
+      Endif
+    Endif
+   Next I
+
+   Close Local File [LNK_]
+  Endif
+ Endif
+ If MAXLINKS & NBLINKS>=MAXLINKS:Break:Endif
+Next ATZ
+
+If adxlog
+ If ASTATUS=0
+  Commit
+ Else
+  Rollback
+ Endif
+Endif
+
+Close Local File [TBR_]
+
+
+$VERIFY_LINKS_END
+End ASTATUS
+
+$VERIFY_LINKS_ERR_EVALUE
+CRITERIA3LOGVAL=0
+Resume

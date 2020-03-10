@@ -1,5 +1,4 @@
 
-
 export class ParseError extends Error {
     errn = 200;
     constructor(message: string) { super(message); }
@@ -2531,7 +2530,3 @@ export class Parser {
         this.parseExp = parseExp;
     }
 }
-
-
-const parsed = new Parser('CONDITION=(1=1)').parse();
-console.log(JSON.stringify(parsed))
