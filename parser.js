@@ -247,6 +247,7 @@ var Parser = /** @class */ (function () {
             return gotEnd;
         }
         function skipLine() {
+            console.log("\n-------------------------------------here--------------------------\n");
             var ch;
             while (pos < source.length && (ch = source.charCodeAt(pos)) !== LF)
                 pos++;
@@ -1267,7 +1268,6 @@ var Parser = /** @class */ (function () {
                 }
                 parseStatementSep();
             }
-            // console.log("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks.length + "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks);
             if (blocks.length > 0)
                 throw error('unterminated block: ' + blocks[blocks.length - 1].tag);
         }

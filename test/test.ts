@@ -3,14 +3,16 @@ import * as fs from 'fs'
 
 let str: any;
 
-fs.readFileSync('./file/ASYRADELETE.src', 'utf8').toString().split('\n').forEach(function (line) {
-   // if (line.indexOf('#') == -1) {
-        str += line;
-   // }
+let copy = fs.readFileSync('./file/ASYRADELETE.src', 'utf8').toString()
+
+
+copy.split('\n').forEach(function (line) {
+    if (line.indexOf('#') != -1)
+      line = line.slice(0, line.indexOf('#'))
+    str += line;
 })
 
-console.log(JSON.stringify(str))
-let value
+let value: any
 value = new Parser(str).parse();
 console.log(JSON.stringify(value))
 
