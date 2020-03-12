@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "parser.ts",
   "scripts": {
-    "prepare": "tsc --target es5 parser.ts",
+    "prepare": "tsc --target es5 index.ts",
     "lint": "tslint --project parser.ts",
     "test": "tsc --target es5 ./test/test.ts && node ./test/test.js"
   },
