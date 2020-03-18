@@ -1,1 +1,1 @@
-console.log("salut")
+export * from './lib';
