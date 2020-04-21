@@ -1,5 +1,3 @@
-
-
 export type Dict<T> = { [key: string]: T; };
 
 // Runtime will automatically promote these errors to X3Error
