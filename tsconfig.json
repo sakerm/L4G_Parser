@@ -1,0 +1,10 @@
+{
+    "include": ["index.ts", "lib/**/*", "test/**/*"],
+    "compilerOptions": {
+        "outDir": "build",
+        "rootDir": ".",
+        "baseUrl": "."
+    },
+    "references": [
+    ]
+}

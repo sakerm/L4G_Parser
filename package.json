@@ -2,13 +2,17 @@
   "name": "newpars",
   "version": "1.0.0",
   "main": "parser.ts",
-  "scripts": {
-    "prepare": "tsc --target es5 ./index.ts",
-    "lint": "tslint --project parser.ts",
-    "test": "tsc --target es5 ./index.ts && node ./index.js"
-  },
   "author": "lomeress",
   "license": "ISC",
+  "homepage": "https://github.com/sakerm/L4G_Parser#readme",
+  "description": "",
+  "bugs": {
+    "url": "https://github.com/sakerm/L4G_Parser/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakerm/L4G_Parser.git"
+  },
   "dependencies": {
     "move-file": "^1.2.0",
     "readline": "^1.3.0"
@@ -18,15 +22,13 @@
     "@types/node": "^13.9.0",
     "fs": "0.0.1-security",
     "tslint": "^6.0.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-microsoft-contrib": "^6.1.1",
     "typescript": "^3.8.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sakerm/L4G_Parser.git"
-  },
-  "bugs": {
-    "url": "https://github.com/sakerm/L4G_Parser/issues"
-  },
-  "homepage": "https://github.com/sakerm/L4G_Parser#readme",
-  "description": ""
+  "scripts": {
+    "build": "tsc -b -v .",
+    "lint": "tslint -p .",
+    "test": "tsc --target es5 ./index.ts && node ./index.js"
+  }
 }

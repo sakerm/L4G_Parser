@@ -3,6 +3,7 @@ import * as fs from 'fs'
 
 let str: any;
 
+console.log(process.argv);
 fs.readFileSync(process.argv[2], 'utf8').toString().split('\n').forEach(function (line) {
    // if (line.indexOf('#') == -1) {
         str += line;
