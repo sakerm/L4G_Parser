@@ -1,4 +1,4 @@
-Local Integer i, s
+Local integer i, s
 
 i = 9
 s = 8
