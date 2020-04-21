@@ -1,17 +1,18 @@
 import { Parser } from './lib/parser'
 import * as fs from 'fs'
 
-let str: string[] = [];
-let copy: string[] = [];
-let count: number = 0
-let value
-let file;
+let str: any;
 
-fs.readFile('./file/ASYRADELETE.src', 'utf8', function (err, files) {
-  file = files.split('\n')
-  while (file.length != count) {
-    value = new Parser(file[count]).parse();
-    console.log(JSON.stringify(value))
-    count += 1
-  };
+fs.readFileSync(process.argv[2], 'utf8').toString().split('\n').forEach(function (line) {
+   // if (line.indexOf('#') == -1) {
+        str += line;
+   // }
 })
+
+console.log(JSON.stringify(str))
+let value
+value = new Parser(str).parse();
+console.log(JSON.stringify(value))
+//console.log(JSON.stringify(str))
+
+//const parsed = new Parser('NBRROL += 1').parse();

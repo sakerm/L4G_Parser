@@ -1415,6 +1415,7 @@ export class Parser {
                 }
                 parseStatementSep();
             }
+           // console.log("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks.length + "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n" + blocks);
             if (blocks.length > 0) throw error('unterminated block: ' + blocks[blocks.length - 1].tag);
         }
 
@@ -1426,7 +1427,6 @@ export class Parser {
 
             if (!op) {
                 // label without $
-
                 if (node.lhs.tag !== 'IDENT') throw error('invalid statement syntax: ' + node.lhs.tag);
                 node.tag = 'LABEL';
                 node.name = scopeName = node.lhs.value;
