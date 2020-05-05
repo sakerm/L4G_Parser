@@ -391,7 +391,6 @@ export class Parser {
         }
 
         function skipLine() {
-            console.log("\n-------------------------------------here--------------------------\n")
             let ch: number;
             while (pos < source.length && (ch = source.charCodeAt(pos)) !== LF) pos++;
             pos++;
