@@ -21,6 +21,9 @@
   "devDependencies": {
     "@types/jasmine": "^3.5.7",
     "@types/node": "^13.9.0",
+    "@typescript-eslint/eslint-plugin": "^2.31.0",
+    "@typescript-eslint/parser": "^2.31.0",
+    "eslint": "^6.8.0",
     "fs": "0.0.1-security",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
@@ -29,7 +32,7 @@
   },
   "scripts": {
     "build": "tsc -b -v .",
-    "lint": "tslint -p .",
+    "lint": "eslint .",
     "test": "tsc --target es5 ./index.ts && node ./index.js"
   }
 }
