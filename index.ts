@@ -6,11 +6,11 @@ let str: any;
 console.log(process.argv);
 fs.readFileSync(process.argv[2], 'utf8').toString().split('\n').forEach(function (line) {
    // if (line.indexOf('#') == -1) {
-        str += line;
+      str += '\n'
+      str += line;
    // }
 });
 
-console.log(JSON.stringify(str));
 let value: any;
 value = new Parser(str).parse();
 console.log(JSON.stringify(value));

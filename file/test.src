@@ -3,6 +3,6 @@ Local integer i, s
 i = 9
 s = 8
 
-if (i < 3)
+while (i < 10)
     infbox(num$(I))
-ENDIF
+WEND
