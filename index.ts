@@ -1,44 +1,44 @@
 import * as fs from 'mz/fs';
-
 // import { Parser } from './lib/parser';
 
-const readFile =  async (filename:string) => {
-   console.log(`readFile:${filename}`);
-   const lines = fs.readFileSync(filename, 'utf8').split('\n'); 
-   const contents = lines.reduce( (r:string, line:string) => {
-         r += line;
-         return r;
-   }, '' as string);
+function handle(error: any) {
+   console.log('error:', JSON.stringify(error, null, '\t'));
+}
 
-   console.log('contents:\n'+contents);
+async function readFile(filename: string) {
+   console.log(`readFile:${filename}`);
+   const contents = fs.readFileSync(filename, 'utf8');
+   console.log('contents:\n' + contents);
    // const value = new Parser(contents).parse();
    // console.log(JSON.stringify(value));
-};
+}
 
-const readDir = async (dirname:string) => {
+async function readDir(dirname: string) {
    console.log(`readDir:${dirname}`);
    const filenames = await fs.readdir(dirname);
-   filenames.forEach((filename:string) => {
-      readFile(`${dirname}${filename}`);
+   filenames.forEach((filename: string) => {
+      readFile(`${dirname}${filename}`).catch(handle);
    });
-};
+}
 
-function is_dir(path) {
+function isDir(path: string): boolean {
    try {
-       const stat = fs.lstatSync(path);
-       return stat.isDirectory();
+      const stat = fs.lstatSync(path);
+      return stat.isDirectory();
    } catch (e) {
-       // lstatSync throws an error if path doesn't exist
-       return false;
+      // lstatSync throws an error if path doesn't exist
+      return false;
    }
 }
 
-console.log(process.argv);
-
-(async (args:string[]) => {
-   if (is_dir(args[2])) {
-      await readDir(args[2]);
-   } else {
-      await readFile(args[2]);
+async function main(args: string[]) {
+   if (args.length >= 2) {
+      if (isDir(args[2])) {
+         await readDir(args[2]).catch(handle);
+      } else {
+         await readFile(args[2]).catch(handle);
+      }
    }
-})(process.argv);
+}
+
+main(process.argv).catch(handle);
