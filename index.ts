@@ -43,7 +43,7 @@ function is_dir(path) {
    }
 }
 
-str = "";
+str = '';
 
 if (is_dir(process.argv[2])) {
    readFiles(process.argv[2]);
