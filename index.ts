@@ -1,37 +1,27 @@
-import * as fs from 'fs';
-import { Parser } from './lib/parser';
+import * as fs from 'mz/fs';
 
-let str: string;
+// import { Parser } from './lib/parser';
 
-function readFiles(dirname) {
-   fs.readdir(dirname, function(err, filenames) {
-     if (err) {
-       return;
-     }
-     filenames.forEach(function(filename) {
-      fs.readFile(dirname + filename, 'utf-8', function() {
-        if (err) {
-          return;
-        }
-        fs.readFileSync(dirname+filename, 'utf8').toString().split('\n').forEach(function (line) {
-               str += line;
-         });
-         console.log(str + '\n' + '-------------------'+filename +'-----------------------');
-         str = '\0';
-      });
-    });
-  });
-}
+const readFile =  async (filename:string) => {
+   console.log(`readFile:${filename}`);
+   const lines = fs.readFileSync(filename, 'utf8').split('\n'); 
+   const contents = lines.reduce( (r:string, line:string) => {
+         r += line;
+         return r;
+   }, '' as string);
 
-function readFile(filename) {
-   fs.readFileSync(filename, 'utf8').toString().split('\n').forEach(function (line, index) {
-       //if (line.indexOf('#') == -1) {
-           str += line;
-       //}
+   console.log('contents:\n'+contents);
+   // const value = new Parser(contents).parse();
+   // console.log(JSON.stringify(value));
+};
+
+const readDir = async (dirname:string) => {
+   console.log(`readDir:${dirname}`);
+   const filenames = await fs.readdir(dirname);
+   filenames.forEach((filename:string) => {
+      readFile(`${dirname}${filename}`);
    });
-   //console.log(str)
-   return(str);
-}
+};
 
 function is_dir(path) {
    try {
@@ -43,18 +33,12 @@ function is_dir(path) {
    }
 }
 
-str = '';
+console.log(process.argv);
 
-if (is_dir(process.argv[2])) {
-   readFiles(process.argv[2]);
-}
-else {
-   //console.log(JSON.stringify(readFile(process.argv[2])));
-   let value: any;
-   value = new Parser(readFile(process.argv[2])).parse();
-   console.log(JSON.stringify(value));
-}
-
-//console.log(JSON.stringify(str))
-
-//const parsed = new Parser('NBRROL += 1').parse();
+(async (args:string[]) => {
+   if (is_dir(args[2])) {
+      await readDir(args[2]);
+   } else {
+      await readFile(args[2]);
+   }
+})(process.argv);
