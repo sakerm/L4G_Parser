@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { Parser } from './lib/parser';
 
-let str: any;
+let str: string;
 
 function readFiles(dirname) {
    fs.readdir(dirname, function(err, filenames) {
@@ -24,11 +24,12 @@ function readFiles(dirname) {
 }
 
 function readFile(filename) {
-   fs.readFileSync(filename, 'utf8').toString().split('\n').forEach(function (line) {
-      // if (line.indexOf('#') == -1) {
+   fs.readFileSync(filename, 'utf8').toString().split('\n').forEach(function (line, index) {
+       //if (line.indexOf('#') == -1) {
            str += line;
-      // }
+       //}
    });
+   //console.log(str)
    return(str);
 }
 
@@ -42,11 +43,13 @@ function is_dir(path) {
    }
 }
 
+str = "";
+
 if (is_dir(process.argv[2])) {
    readFiles(process.argv[2]);
 }
 else {
-   console.log(JSON.stringify(readFile(process.argv[2])));
+   //console.log(JSON.stringify(readFile(process.argv[2])));
    let value: any;
    value = new Parser(readFile(process.argv[2])).parse();
    console.log(JSON.stringify(value));
