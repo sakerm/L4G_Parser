@@ -17,7 +17,10 @@ async function readDir(dirname: string) {
    console.log(`readDir:${dirname}`);
    const filenames = await fs.readdir(dirname);
    filenames.forEach((filename: string) => {
-      readFile(`${dirname}${filename}`).catch(handle);
+      const path = `${dirname}${filename}`;
+      if (!isDir(path)) {
+         readFile(`${dirname}${filename}`).catch(handle);
+      }
    });
 }
 
