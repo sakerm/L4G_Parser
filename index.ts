@@ -1,16 +1,36 @@
 import * as fs from 'mz/fs';
-// import { Parser } from './lib/parser';
+import { Parser } from './lib/parser';
+import { check_parameter } from './lib/checkparse';
 
 function handle(error: any) {
    console.log('error:', JSON.stringify(error, null, '\t'));
 }
-
+//test not finish
 async function readFile(filename: string) {
    console.log(`readFile:${filename}`);
    const contents = fs.readFileSync(filename, 'utf8');
    console.log('contents:\n' + contents);
-   // const value = new Parser(contents).parse();
-   // console.log(JSON.stringify(value));
+   const value = new Parser(contents).parse();
+   console.log(JSON.stringify(value));
+   var searchVal = ['value'];
+   var getTitle=function(json,val){
+      for (var key in json) {
+        var titles= json[key];
+        for (var tit in titles) {
+          var names=titles[tit];
+          for (var name in names) {
+            var string=names[name];
+            if(string===val)
+              return tit;
+          }
+        }
+    }
+    }
+    
+    searchVal.forEach(function(valToSearch){
+       console.log(getTitle(JSON.stringify(value),valToSearch));
+    });
+    //testnot finish
 }
 
 async function readDir(dirname: string) {
@@ -43,5 +63,4 @@ async function main(args: string[]) {
       }
    }
 }
-
 main(process.argv).catch(handle);

@@ -35,5 +35,10 @@
     "build": "tsc -b -v .",
     "lint": "tslint -p .",
     "test": "tsc --target es5 ./index.ts && node ./index.js ./file/"
-  }
+  },
+  "no-warning-comment": [0, {
+    "terms": ["todo", "fixme", "xxx"], "location":"start"
+  }]
 }
+
+
