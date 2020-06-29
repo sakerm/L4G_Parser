@@ -906,7 +906,7 @@ export class Parser {
             } else if (mandatory) throw error(kw + ' missing');
         }
 
-        function parseClass(mandatory?: boolean) {
+        function parseClass(mandatory?: boolean) : Node | void | never {
             const node = new Node('CLAS');
 
             if (parseChar(BRA_OPEN)) {
@@ -1142,7 +1142,7 @@ export class Parser {
             return node;
         }
 
-        function parseAscDesc() {
+        function parseAscDesc() : number | void {
             if (parseKeyword('ASC')) return 1;
             else if (parseKeyword('DESC')) return -1;
         }
@@ -1212,7 +1212,7 @@ export class Parser {
             return node;
         }
 
-        function parseType(mandatory?: boolean) {
+        function parseType(mandatory?: boolean) : string | void {
             const w = parseWord(true);
             const kw = toKeyword(w);
 
@@ -1324,7 +1324,7 @@ export class Parser {
             node.mode = node.tag;
             node.tag = 'DECL';
 
-            function parseCommas() {
+            function parseCommas() : any | void {
                 if (!parseChar(PAR_OPEN)) return;
                 const exps: Node[] = [];
 

@@ -20,8 +20,12 @@
   },
   "devDependencies": {
     "@types/jasmine": "^3.5.7",
+    "@types/mz": "^0.0.32",
     "@types/node": "^13.9.0",
     "fs": "0.0.1-security",
+    "f-promise": "^2.0.3",
+    "lodash": "^4.17.11",
+    "mz": "^2.7.0",
     "tslint": "^6.0.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-microsoft-contrib": "^6.1.1",
@@ -30,6 +34,6 @@
   "scripts": {
     "build": "tsc -b -v .",
     "lint": "tslint -p .",
-    "test": "tsc --target es5 ./index.ts && node ./index.js"
+    "test": "tsc --target es5 ./index.ts && node ./index.js ./file/"
   }
 }
