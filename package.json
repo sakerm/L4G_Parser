@@ -34,7 +34,7 @@
   "scripts": {
     "build": "tsc -p .",
     "lint": "tslint -p .",
-    "test": "tsc --target es5 ./index.ts && node ./index.js ./file/"
+    "test": "tsc -p . && node ./build/index.js ./file/"
   },
   "no-warning-comment": [0, {
     "terms": ["todo", "fixme", "xxx"], "location":"start"
