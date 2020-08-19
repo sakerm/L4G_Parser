@@ -32,7 +32,7 @@
     "typescript": "^3.8.2"
   },
   "scripts": {
-    "build": "tsc -b -v .",
+    "build": "tsc -p .",
     "lint": "tslint -p .",
     "test": "tsc --target es5 ./index.ts && node ./index.js ./file/"
   },
