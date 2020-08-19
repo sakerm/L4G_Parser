@@ -11,7 +11,8 @@ async function readFile(filename: string) {
    const contents = fs.readFileSync(filename, 'utf8');
    console.log('contents:\n' + contents);
    const value = new Parser(contents).parse();
-   console.log(JSON.stringify(value));
+   console.log(value);
+   //console.log(JSON.stringify(value));
    var searchVal = ['value'];
    var getTitle=function(json,val){
       for (var key in json) {
@@ -24,8 +25,8 @@ async function readFile(filename: string) {
               return tit;
           }
         }
-    }
-    }
+      }
+   }
     
     searchVal.forEach(function(valToSearch){
        console.log(getTitle(JSON.stringify(value),valToSearch));
@@ -55,11 +56,16 @@ function isDir(path: string): boolean {
 }
 
 async function main(args: string[]) {
-   if (args.length >= 2) {
-      if (isDir(args[2])) {
-         await readDir(args[2]).catch(handle);
+
+   console.log("----------------------------ici");
+   console.log(args[3]);
+   console.log("----------------------------ici");
+   if (args.length == 4) {
+      if (isDir(args[3])) {
+         console.log(readDir(args[3]).catch(handle));
+         await readDir(args[3]).catch(handle);
       } else {
-         await readFile(args[2]).catch(handle);
+         readFile(args[3]).catch(handle);
       }
    }
 }
