@@ -1,10 +1,10 @@
-export class check_parameter {
-    Param: () => {
-        JSONParam: string;
+/*export class checkParameter {
+    param : () => {
+        jsonparam: string;
     };
-};
-function unusedParameter(JSONParam: string) {
-    console.log("---------------------------------------------------")
+}*/
+function unusedParameter(JSONP: string) {
+    console.log('---------------------------------------------------');
     
-    console.log(JSONParam);
+    console.log(JSONP);
 }

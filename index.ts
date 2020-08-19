@@ -1,6 +1,5 @@
 import * as fs from 'mz/fs';
 import { Parser } from './lib/parser';
-import { check_parameter } from './lib/checkparse';
 
 function handle(error: any) {
    console.log('error:', JSON.stringify(error, null, '\t'));
@@ -13,22 +12,21 @@ async function readFile(filename: string) {
    const value = new Parser(contents).parse();
    console.log(value);
    //console.log(JSON.stringify(value));
-   var searchVal = ['value'];
-   var getTitle=function(json,val){
-      for (var key in json) {
-        var titles= json[key];
-        for (var tit in titles) {
-          var names=titles[tit];
-          for (var name in names) {
-            var string=names[name];
-            if(string===val)
+   const searchVal = ['value'];
+   const getTitle=function(json,val){
+      for (const key in json) {
+        const titles= json[key];
+        for (const tit in titles) {
+          const names=titles[tit];
+          for (const name in names) {
+            const stringy=names[name];
+            if(stringy===val)
               return tit;
           }
         }
       }
-   }
-    
-    searchVal.forEach(function(valToSearch){
+   };
+   searchVal.forEach(function(valToSearch){
        console.log(getTitle(JSON.stringify(value),valToSearch));
     });
     //testnot finish
@@ -57,10 +55,10 @@ function isDir(path: string): boolean {
 
 async function main(args: string[]) {
 
-   console.log("----------------------------ici");
+   console.log('----------------------------ici');
    console.log(args[3]);
-   console.log("----------------------------ici");
-   if (args.length == 4) {
+   console.log('----------------------------ici');
+   if (args.length === 4) {
       if (isDir(args[3])) {
          console.log(readDir(args[3]).catch(handle));
          await readDir(args[3]).catch(handle);
