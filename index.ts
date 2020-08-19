@@ -44,6 +44,7 @@ async function readDir(dirname: string) {
 }
 
 function isDir(path: string): boolean {
+   console.log(`isDir:${path}`);
    try {
       const stat = fs.lstatSync(path);
       return stat.isDirectory();
@@ -54,16 +55,15 @@ function isDir(path: string): boolean {
 }
 
 async function main(args: string[]) {
-
    console.log('----------------------------ici');
-   console.log(args[3]);
+   console.log(args[2]);
    console.log('----------------------------ici');
-   if (args.length === 4) {
-      if (isDir(args[3])) {
-         console.log(readDir(args[3]).catch(handle));
-         await readDir(args[3]).catch(handle);
+   if (args.length >= 3) {
+      if (isDir(args[2])) {
+         console.log(readDir(args[2]).catch(handle));
+         await readDir(args[2]).catch(handle);
       } else {
-         readFile(args[3]).catch(handle);
+         readFile(args[2]).catch(handle);
       }
    }
 }
