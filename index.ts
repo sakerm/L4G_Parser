@@ -10,8 +10,8 @@ async function readFile(filename: string) {
    const contents = fs.readFileSync(filename, 'utf8');
    console.log('contents:\n' + contents);
    const value = new Parser(contents).parse();
-   console.log(value);
-   //console.log(JSON.stringify(value));
+   console.log(value); //detail
+   console.log(JSON.stringify(value)); //here
    const searchVal = ['value'];
    const getTitle=function(json,val){
       for (const key in json) {
